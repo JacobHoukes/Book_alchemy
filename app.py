@@ -89,5 +89,25 @@ def home():
     return render_template("home.html", books=books, no_results=no_results, search_term=search_term)
 
 
+@app.route("/book/<int:book_id>/delete", methods=['POST'])
+def delete_book(book_id):
+    """docstring here"""
+
+    book = Book.query.get_or_404(book_id)
+    author = book.author
+    title = book.title
+
+    try:
+        db.session.delete(book)
+        db.session.commit()
+        print(f"Book '{title}' removed successfully!")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error removing book: {str(e)}")
+
+    return render_template('home.html', book=book)
+
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
