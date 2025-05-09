@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <form method="get" action="/">
+      <label for="sort">Sort by:</label>
+      <select name="sort" id="sort" onchange="this.form.submit()">
+        <option value="title" {% if request.args.get('sort') == 'title' %}selected{% endif %}>Title</option>
+        <option value="author" {% if request.args.get('sort') == 'author' %}selected{% endif %}>Author</option>
+      </select>
+    </form>
+
+    <div class="book-container">
+      {% for book in books %}
+        <div class="book">
+          <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg" alt="Book cover for {{ book.title }}">
+          <h3>{{ book.title }}</h3>
+          <p><small>by {{ book.author_name }}</small></p>
+        </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>
