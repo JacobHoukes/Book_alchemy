@@ -70,18 +70,23 @@ def add_book():
 @app.route("/")
 def home():
     """This function displays all books with their authors on the homepage, with optional sorting."""
-    sort_by = request.args.get("sort", "title")  # Default sort is by title
+    sort_by = request.args.get("sort", "title")
+    search_term = request.args.get("search", "").strip()
 
+    query = db.session.query(Book.title, Book.isbn, Author.name.label('author_name')) \
+        .join(Author, Book.author_id == Author.id)
+
+    if search_term:
+        query = query.filter(Book.title.ilike(f"%{search_term}%"))
     if sort_by == "author":
-        books = db.session.query(Book.title, Book.isbn, Author.name.label('author_name')) \
-            .join(Author, Book.author_id == Author.id) \
-            .order_by(Author.name).all()
+        query = query.order_by(Author.name)
     else:
-        books = db.session.query(Book.title, Book.isbn, Author.name.label('author_name')) \
-            .join(Author, Book.author_id == Author.id) \
-            .order_by(Book.title).all()
+        query = query.order_by(Book.title)
 
-    return render_template("home.html", books=books)
+    books = query.all()
+    no_results = not books and search_term
+
+    return render_template("home.html", books=books, no_results=no_results, search_term=search_term)
 
 
 if __name__ == '__main__':

@@ -5,31 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="{{ url_for('static', filename='form_page.css') }}">
-    <title>Add Book</title>
   </head>
   <body>
-    <div class="form-container">
-      <form action="/add_book" method="POST">
-        <h2>Add Book</h2>
-        <label for="isbn">ISBN:</label>
-        <input type="text" id="isbn" name="isbn" required>
 
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title" required>
+  <form action="/add_book" method="POST">
+    <label for="isbn">ISBN:</label>
+    <input type="text" id="isbn" name="isbn" required><br><br>
 
-        <label for="publication_year">Publication Year:</label>
-        <input type="number" id="publication_year" name="publication_year" required>
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" required><br><br>
 
-        <label for="author_id">Author:</label>
-        <select id="author_id" name="author_id" required>
-          <option value="">-- Select an author --</option>
-          {% for author in authors %}
-            <option value="{{ author.id }}">{{ author.name }}</option>
-          {% endfor %}
-        </select>
+    <label for="publication_year">Publication Year:</label>
+    <input type="number" id="publication_year" name="publication_year" required><br><br>
 
-        <input type="submit" value="Add Book">
-      </form>
-    </div>
+    <label for="author_id">Author:</label>
+    <select id="author_id" name="author_id" required>
+      <option value="">-- Select an author --</option>
+      {% for author in authors %}
+        <option value="{{ author.id }}">{{ author.name }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <input type="submit" value="Add Book">
+  </form>
+
   </body>
 </html>

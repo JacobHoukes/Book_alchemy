@@ -15,6 +15,18 @@
       </select>
     </form>
 
+    <form method="get" action="/" style="margin-bottom: 20px;">
+  <label for="search">Search:</label>
+  <div class="search-container">
+    <input type="text" id="search" name="search" value="{{ request.args.get('search', '') }}" placeholder="Search...">
+    <button type="submit">Search</button>
+  </div>
+</form>
+
+    {% if no_results %}
+      <p>No books match your search for "{{ search_term }}".</p>
+    {% endif %}
+
     <div class="book-container">
       {% for book in books %}
         <div class="book">
