@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from data_models import db, Author, Book
 from datetime import datetime
@@ -72,9 +72,9 @@ def home():
     """This function displays all books with their authors on the homepage, with optional sorting."""
     sort_by = request.args.get("sort", "title")
     search_term = request.args.get("search", "").strip()
+    deleted_title = request.args.get("deleted")  # for success message
 
-    query = db.session.query(Book.title, Book.isbn, Author.name.label('author_name')) \
-        .join(Author, Book.author_id == Author.id)
+    query = db.session.query(Book, Author).join(Author, Book.author_id == Author.id)
 
     if search_term:
         query = query.filter(Book.title.ilike(f"%{search_term}%"))
@@ -83,30 +83,43 @@ def home():
     else:
         query = query.order_by(Book.title)
 
-    books = query.all()
+    results = query.all()
+    books = [{
+        "id": book.id,
+        "title": book.title,
+        "isbn": book.isbn,
+        "author_name": author.name
+    } for book, author in results]
+
     no_results = not books and search_term
 
-    return render_template("home.html", books=books, no_results=no_results, search_term=search_term)
+    return render_template("home.html", books=books, no_results=no_results, search_term=search_term,
+                           deleted_title=deleted_title)
 
 
 @app.route("/book/<int:book_id>/delete", methods=['POST'])
 def delete_book(book_id):
-    """docstring here"""
-
+    """This function deletes a book, and deletes its author if the author has no other books."""
     book = Book.query.get_or_404(book_id)
-    author = book.author
     title = book.title
+    author = book.author_id
 
     try:
         db.session.delete(book)
         db.session.commit()
-        print(f"Book '{title}' removed successfully!")
+
+        # Check if author has any other books
+        other_books = Book.query.filter_by(author_id=author.id).count()
+        if other_books == 0:
+            db.session.delete(author)
+            db.session.commit()
+
+        print(f"Deleted book '{title}' successfully.")
+        return redirect(f"/?deleted={title}")
     except Exception as e:
         db.session.rollback()
-        print(f"Error removing book: {str(e)}")
-
-    return render_template('home.html', book=book)
-
+        print(f"Error deleting book: {str(e)}")
+        return redirect("/")
 
 
 if __name__ == '__main__':
